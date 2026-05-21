@@ -1,19 +1,26 @@
-// Tipos del dominio — implementar en rama de feature
-
 export interface Patient {
-  id: string;
-  fullName: string;
+  id: number;
+  full_name: string;
   email: string;
-  phoneCountryCode: string;
-  phoneNumber: string;
-  documentPhotoUrl: string;
-  createdAt: string;
+  phone_country_code: string;
+  phone_number: string;
+  document_photo_url: string;
+  created_at: string;
 }
 
-export interface CreatePatientPayload {
+export interface PatientFormValues {
   fullName: string;
   email: string;
   phoneCountryCode: string;
   phoneNumber: string;
-  documentPhoto: File;
+  documentPhoto: File | null;
+}
+
+export type FormErrors = Partial<Record<keyof PatientFormValues, string>>;
+
+export type SubmitModalState = 'idle' | 'submitting' | 'success' | 'error';
+
+export interface ApiValidationError {
+  message: string;
+  errors?: Record<string, string[]>;
 }

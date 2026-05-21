@@ -1,94 +1,76 @@
 # Patient Registration — FullStack Challenge
 
-Aplicación de registro de pacientes con **Laravel** (API) y **React** (SPA), PostgreSQL y Docker.
+Patient registration app built with **Laravel** (API) and **React** (SPA), PostgreSQL, and Docker.
 
-## Estado del repositorio
+## Repository layout
 
-| Rama | Contenido |
-|------|-----------|
-| `main` | Estructura del proyecto, Docker, overlays y scaffolding |
-| `feature/*` | Implementación de funcionalidades (crear antes de codear) |
+| Branch | Purpose |
+|--------|---------|
+| `main` | Project structure and Docker setup |
+| `feature/*` | Feature implementation |
 
-### Flujo de trabajo con Git
-
-```bash
-# 1. Estructura ya está en main — commitear y pushear si corresponde
-git add .
-git commit -m "chore: project structure (Laravel + React + Docker)"
-
-# 2. Antes de implementar features, crear rama
-git checkout -b feature/patient-registration
-
-# 3. Instalar Laravel en backend (solo la primera vez)
-make setup-backend
-
-# 4. Instalar dependencias del frontend
-make setup-frontend
-
-# 5. Levantar entorno
-docker compose up -d
-```
-
-> **Importante:** no implementar la lógica del challenge en `main`. Toda la funcionalidad va en la rama de feature.
-
-## Estructura del proyecto
+## Project structure
 
 ```
 challenge-light-it/
-├── backend/                 # Laravel API (se instala con make setup-backend)
-│   ├── docker/
-│   └── Dockerfile
-├── frontend/                # React + Vite + TypeScript
-│   └── src/
-│       ├── components/      # common | patients | forms
-│       ├── hooks/
-│       ├── services/
-│       ├── types/
-│       └── styles/
-├── infra/overlays/          # Carpetas y stubs que se copian al instalar Laravel
-├── scripts/setup-backend.sh
+├── backend/          # Laravel API
+├── frontend/         # React + Vite + TypeScript
+├── scripts/          # Setup and Docker helpers
 ├── docker-compose.yml
 └── Makefile
 ```
 
-## Requisitos
+## Requirements
 
-- Docker y Docker Compose
-- Node.js 20+ (para desarrollo local del frontend)
-- Make (opcional)
+- Docker Desktop
+- Node.js 20+ (local frontend development)
 
-## Setup inicial
+## Quick start
 
 ```bash
-make setup          # backend (Laravel) + frontend (npm)
-docker compose up -d
+git checkout feature/patient-registration
+make setup-backend    # first time only
+make setup-frontend   # first time only
+make docker-reset     # build and start all services
 ```
 
-### URLs locales
-
-| Servicio | URL |
-|----------|-----|
-| Frontend | http://localhost:5173 |
-| API | http://localhost:8000/api |
-| Mailpit (emails) | http://localhost:8025 |
-| PostgreSQL | localhost:5432 |
+| Service | URL |
+|---------|-----|
+| App | http://localhost:5173 |
+| API health | http://localhost:8000/api/health |
+| Mailpit | http://localhost:8025 |
+| PostgreSQL (host) | `localhost:5433` |
 
 ## Stack
 
-- **Backend:** Laravel 11, PostgreSQL, colas (`database`), Mailpit
+- **Backend:** Laravel 13, PostgreSQL, queue workers, Mailpit
 - **Frontend:** React 19, TypeScript, Vite, ESLint, Prettier
-- **Sin UI kits** (no Material UI / shadcn) — componentes propios
+- Custom UI components (no Material UI / shadcn)
 
-## Funcionalidades a implementar (rama feature)
+## API
 
-Ver enunciado del challenge. Resumen:
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/health` | Health check |
+| GET | `/api/patients` | List patients |
+| POST | `/api/patients` | Register patient (multipart) |
 
-**Backend:** API de registro, validación Laravel, email único, foto de documento, PostgreSQL, email async, Docker.
+## Features
 
-**Frontend:** Tarjetas expandibles, formulario con drag & drop JPG, validación (letras, @gmail.com, teléfono en 2 campos), modal de estados, refresh automático.
+**Backend:** Validation via Form Request, unique Gmail addresses, JPG document upload, async confirmation email, PostgreSQL.
 
-**Futuro:** preparar capa de notificaciones para SMS (`app/Services/Notifications/`).
+**Frontend:** Expandable patient cards, drag-and-drop JPG upload, client-side validation on submit, status modal, auto-refresh after registration.
 
-## Anonimato
+**Future SMS:** `app/Services/Notifications/SmsNotificationService.php` (stub).
 
-No incluir nombre personal en el código fuente (requisito del challenge).
+## Git workflow
+
+Implement features on a branch (not `main`):
+
+```bash
+git checkout -b feature/patient-registration
+```
+
+## Anonymity
+
+Do not include personal names in source code (challenge requirement).

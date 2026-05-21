@@ -7,3 +7,4 @@ Route::get('/health', fn () => response()->json(['status' => 'ok']));
 
 Route::get('/patients', [PatientController::class, 'index']);
 Route::post('/patients', [PatientController::class, 'store']);
+Route::delete('/patients/{patient}', [PatientController::class, 'destroy']);

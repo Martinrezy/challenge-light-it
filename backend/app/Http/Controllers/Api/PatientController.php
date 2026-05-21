@@ -40,4 +40,11 @@ class PatientController extends Controller
             ->response()
             ->setStatusCode(201);
     }
+
+    public function destroy(Patient $patient): JsonResponse
+    {
+        $this->patientService->delete($patient);
+
+        return response()->json(['message' => 'Patient deleted successfully.']);
+    }
 }

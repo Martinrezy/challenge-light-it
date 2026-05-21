@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Button } from '@/components/common/Button';
 import { DragDropInput } from './DragDropInput';
 import { validatePatientForm, hasErrors } from '@/utils/validation';
@@ -16,12 +16,20 @@ const initialValues: PatientFormValues = {
 interface PatientFormProps {
   onSubmit: (values: PatientFormValues) => void;
   disabled?: boolean;
+  serverErrors?: FormErrors;
 }
 
-export function PatientForm({ onSubmit, disabled }: PatientFormProps) {
+export function PatientForm({ onSubmit, disabled, serverErrors }: PatientFormProps) {
   const [values, setValues] = useState<PatientFormValues>(initialValues);
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    if (serverErrors && Object.keys(serverErrors).length > 0) {
+      setErrors(serverErrors);
+      setSubmitted(true);
+    }
+  }, [serverErrors]);
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
@@ -50,7 +58,16 @@ export function PatientForm({ onSubmit, disabled }: PatientFormProps) {
         value={values[name]}
         placeholder={placeholder}
         disabled={disabled}
-        onChange={(e) => setValues((v) => ({ ...v, [name]: e.target.value }))}
+        onChange={(e) => {
+          setValues((v) => ({ ...v, [name]: e.target.value }));
+          if (errors[name]) {
+            setErrors((current) => {
+              const next = { ...current };
+              delete next[name];
+              return next;
+            });
+          }
+        }}
       />
       {submitted && errors[name] && <p className="field__error">{errors[name]}</p>}
     </div>
@@ -73,7 +90,16 @@ export function PatientForm({ onSubmit, disabled }: PatientFormProps) {
             value={values.phoneCountryCode}
             placeholder="+598"
             disabled={disabled}
-            onChange={(e) => setValues((v) => ({ ...v, phoneCountryCode: e.target.value }))}
+            onChange={(e) => {
+              setValues((v) => ({ ...v, phoneCountryCode: e.target.value }));
+              if (errors.phoneCountryCode) {
+                setErrors((current) => {
+                  const next = { ...current };
+                  delete next.phoneCountryCode;
+                  return next;
+                });
+              }
+            }}
           />
           {submitted && errors.phoneCountryCode && (
             <p className="field__error">{errors.phoneCountryCode}</p>
@@ -90,7 +116,16 @@ export function PatientForm({ onSubmit, disabled }: PatientFormProps) {
             value={values.phoneNumber}
             placeholder="99123456"
             disabled={disabled}
-            onChange={(e) => setValues((v) => ({ ...v, phoneNumber: e.target.value }))}
+            onChange={(e) => {
+              setValues((v) => ({ ...v, phoneNumber: e.target.value }));
+              if (errors.phoneNumber) {
+                setErrors((current) => {
+                  const next = { ...current };
+                  delete next.phoneNumber;
+                  return next;
+                });
+              }
+            }}
           />
           {submitted && errors.phoneNumber && (
             <p className="field__error">{errors.phoneNumber}</p>
@@ -100,13 +135,22 @@ export function PatientForm({ onSubmit, disabled }: PatientFormProps) {
 
       <DragDropInput
         file={values.documentPhoto}
-        onChange={(documentPhoto) => setValues((v) => ({ ...v, documentPhoto }))}
+        onChange={(documentPhoto) => {
+          setValues((v) => ({ ...v, documentPhoto }));
+          if (errors.documentPhoto) {
+            setErrors((current) => {
+              const next = { ...current };
+              delete next.documentPhoto;
+              return next;
+            });
+          }
+        }}
         error={errors.documentPhoto}
         showError={submitted}
       />
 
       <Button type="submit" disabled={disabled} className="patient-form__submit">
-        Register patient
+        {disabled ? 'Registering...' : 'Register patient'}
       </Button>
     </form>
   );

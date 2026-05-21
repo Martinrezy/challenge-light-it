@@ -10,17 +10,31 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
+.patient-card__top {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
+  padding: 0.5rem 0.5rem 0.5rem 0;
+}
+
 .patient-card__header {
   display: flex;
   align-items: center;
   gap: 1rem;
-  width: 100%;
-  padding: 1rem;
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0.5rem 0.5rem 1rem;
   border: none;
   background: none;
   cursor: pointer;
   text-align: left;
   font-family: inherit;
+  border-radius: var(--radius-md);
+  transition: background 0.2s;
+}
+
+.patient-card__header:hover {
+  background: var(--color-background);
 }
 
 .patient-card__photo {
@@ -44,15 +58,55 @@
   font-weight: 600;
 }
 
+.patient-card__delete {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.5rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 1px solid var(--color-error);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-error);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, transform 0.15s;
+  flex-shrink: 0;
+}
+
+.patient-card__delete-icon {
+  display: block;
+}
+
+.patient-card__delete:hover:not(:disabled) {
+  background: var(--color-error);
+  color: #fff;
+  transform: scale(1.05);
+}
+
+.patient-card__delete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.patient-card__details-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.35s ease;
+}
+
+.patient-card__details-panel--open {
+  grid-template-rows: 1fr;
+}
+
 .patient-card__details {
-  max-height: 0;
   overflow: hidden;
-  transition: max-height 0.35s ease, padding 0.35s ease;
   padding: 0 1rem;
 }
 
-.patient-card__details--open {
-  max-height: 200px;
+.patient-card__details-panel--open .patient-card__details {
   padding: 0 1rem 1rem;
 }
 
@@ -73,4 +127,48 @@
 .patient-card__details dd {
   margin: 0;
   font-size: 0.95rem;
+}
+
+.patient-card__confirm p {
+  margin: 0 0 1rem;
+  color: var(--color-text-muted);
+}
+
+.patient-card__confirm-error {
+  color: var(--color-error);
+  font-size: 0.9rem;
+}
+
+.patient-card__confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.patient-card__confirm-cancel,
+.patient-card__confirm-delete {
+  padding: 0.55rem 1rem;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.patient-card__confirm-cancel {
+  background: var(--color-background);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.patient-card__confirm-delete {
+  background: var(--color-error);
+  color: #fff;
+}
+
+.patient-card__confirm-delete:disabled,
+.patient-card__confirm-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

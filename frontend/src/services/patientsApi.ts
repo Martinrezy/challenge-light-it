@@ -1,4 +1,10 @@
-import type { ApiValidationError, Patient, PatientFormValues } from '@/types/patient';
+import {
+  PatientApiValidationError,
+  type ApiValidationError,
+  type Patient,
+  type PatientFormValues,
+} from '@/types/patient';
+import { mapApiErrorsToFormErrors } from '@/utils/mapApiErrors';
 
 const API_URL = import.meta.env.VITE_API_URL ?? '/api';
 
@@ -14,6 +20,17 @@ function buildFormData(values: PatientFormValues): FormData {
   }
 
   return formData;
+}
+
+function throwValidationError(json: ApiValidationError): never {
+  const fieldErrors = mapApiErrorsToFormErrors(json.errors);
+  const message =
+    fieldErrors.email ??
+    Object.values(fieldErrors)[0] ??
+    json.message ??
+    'Please fix the errors below.';
+
+  throw new PatientApiValidationError(message, fieldErrors);
 }
 
 export async function fetchPatients(): Promise<Patient[]> {
@@ -34,12 +51,24 @@ export async function createPatient(values: PatientFormValues): Promise<Patient>
   const json = await response.json();
 
   if (!response.ok) {
+    if (response.status === 422 && json.errors) {
+      throwValidationError(json as ApiValidationError);
+    }
+
     const error = json as ApiValidationError;
-    const message = error.errors
-      ? Object.values(error.errors).flat().join(' ')
-      : (error.message ?? 'Registration failed.');
-    throw new Error(message);
+    throw new Error(error.message ?? 'Registration failed.');
   }
 
   return json.data as Patient;
+}
+
+export async function deletePatient(id: number): Promise<void> {
+  const response = await fetch(`${API_URL}/patients/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    const json = (await response.json().catch(() => ({}))) as ApiValidationError;
+    throw new Error(json.message ?? 'Failed to delete patient.');
+  }
 }

@@ -7,9 +7,11 @@ interface PatientListProps {
   patients: Patient[];
   loading: boolean;
   error: string | null;
+  onDelete: (id: number) => Promise<void>;
+  deletingId?: number | null;
 }
 
-export function PatientList({ patients, loading, error }: PatientListProps) {
+export function PatientList({ patients, loading, error, onDelete, deletingId = null }: PatientListProps) {
   if (loading) {
     return <Spinner label="Loading patients..." />;
   }
@@ -34,7 +36,12 @@ export function PatientList({ patients, loading, error }: PatientListProps) {
   return (
     <div className="patient-list">
       {patients.map((patient) => (
-        <PatientCard key={patient.id} patient={patient} />
+        <PatientCard
+          key={patient.id}
+          patient={patient}
+          onDelete={onDelete}
+          isDeleting={deletingId === patient.id}
+        />
       ))}
     </div>
   );

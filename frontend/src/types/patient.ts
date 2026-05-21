@@ -24,3 +24,18 @@ export interface ApiValidationError {
   message: string;
   errors?: Record<string, string[]>;
 }
+
+export class PatientApiValidationError extends Error {
+  readonly fieldErrors: FormErrors;
+
+  constructor(message: string, fieldErrors: FormErrors) {
+    super(message);
+    this.name = 'PatientApiValidationError';
+    this.fieldErrors = fieldErrors;
+  }
+}
+
+export type RegisterResult =
+  | { status: 'success' }
+  | { status: 'validation'; fieldErrors: FormErrors }
+  | { status: 'error'; message: string };

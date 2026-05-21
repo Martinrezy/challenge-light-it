@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Jobs\SendPatientConfirmationEmail;
 use App\Models\Patient;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class PatientService
@@ -25,5 +26,14 @@ class PatientService
         SendPatientConfirmationEmail::dispatch($patient);
 
         return $patient;
+    }
+
+    public function delete(Patient $patient): void
+    {
+        if ($patient->document_photo_path) {
+            Storage::disk('public')->delete($patient->document_photo_path);
+        }
+
+        $patient->delete();
     }
 }

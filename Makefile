@@ -1,6 +1,5 @@
-.PHONY: setup setup-backend setup-frontend up down logs
+.PHONY: setup setup-backend setup-frontend up down logs docker-reset dev-local up-infra
 
-# Instala dependencias y prepara el entorno (primera vez)
 setup: setup-backend setup-frontend
 
 setup-backend:
@@ -11,6 +10,18 @@ setup-frontend:
 
 up:
 	docker compose up -d
+
+docker-reset:
+	@./scripts/docker-reset.sh
+
+dev-local:
+	@./scripts/dev-local.sh
+
+up-infra:
+	docker compose -f docker-compose.infra.yml up -d
+
+up-logs:
+	docker compose up
 
 down:
 	docker compose down

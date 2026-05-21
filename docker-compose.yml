@@ -1,55 +1,45 @@
 services:
   postgres:
     image: postgres:16-alpine
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: ${DB_DATABASE:-patients}
-      POSTGRES_USER: ${DB_USERNAME:-patients}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+      POSTGRES_DB: patients
+      POSTGRES_USER: patients
+      POSTGRES_PASSWORD: secret
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-patients} -d ${DB_DATABASE:-patients}"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      test: ["CMD-SHELL", "pg_isready -U patients -d patients"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+      start_period: 10s
 
   mailpit:
     image: axllent/mailpit:latest
+    restart: unless-stopped
     ports:
-      - "${MAILPIT_UI_PORT:-8025}:8025"
-      - "${MAILPIT_SMTP_PORT:-1025}:1025"
+      - "8025:8025"
+      - "1025:1025"
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    restart: unless-stopped
     ports:
-      - "${BACKEND_PORT:-8000}:8000"
+      - "8000:8000"
     volumes:
       - ./backend:/var/www/html
-      - ./infra/overlays:/var/www/overlays:ro
+    env_file:
+      - ./backend/.env.docker
     environment:
-      APP_ENV: local
-      APP_DEBUG: "true"
-      DB_CONNECTION: pgsql
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_DATABASE: ${DB_DATABASE:-patients}
-      DB_USERNAME: ${DB_USERNAME:-patients}
-      DB_PASSWORD: ${DB_PASSWORD:-secret}
-      QUEUE_CONNECTION: database
-      MAIL_MAILER: smtp
-      MAIL_HOST: mailpit
-      MAIL_PORT: 1025
-      MAIL_FROM_ADDRESS: noreply@patient-registration.local
-      MAIL_FROM_NAME: Patient Registration
+      DOCKER_ENV: "true"
     depends_on:
       postgres:
         condition: service_healthy
-      mailpit:
-        condition: service_started
     entrypoint: ["/usr/local/bin/entrypoint.sh"]
     command: ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
 
@@ -57,20 +47,13 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    restart: unless-stopped
     volumes:
       - ./backend:/var/www/html
+    env_file:
+      - ./backend/.env.docker
     environment:
-      APP_ENV: local
-      DB_CONNECTION: pgsql
-      DB_HOST: postgres
-      DB_PORT: 5432
-      DB_DATABASE: ${DB_DATABASE:-patients}
-      DB_USERNAME: ${DB_USERNAME:-patients}
-      DB_PASSWORD: ${DB_PASSWORD:-secret}
-      QUEUE_CONNECTION: database
-      MAIL_MAILER: smtp
-      MAIL_HOST: mailpit
-      MAIL_PORT: 1025
+      DOCKER_ENV: "true"
     depends_on:
       postgres:
         condition: service_healthy
@@ -83,15 +66,17 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+    restart: unless-stopped
     ports:
-      - "${FRONTEND_PORT:-5173}:5173"
+      - "5173:5173"
     volumes:
       - ./frontend:/app
-      - /app/node_modules
+      - frontend_node_modules:/app/node_modules
     environment:
-      VITE_API_URL: ${VITE_API_URL:-http://localhost:8000/api}
+      VITE_API_URL: http://localhost:8000/api
     depends_on:
       - backend
 
 volumes:
   postgres_data:
+  frontend_node_modules:

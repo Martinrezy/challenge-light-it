@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Build / cache
+dist/
+build/
+.phpunit.cache/
+.phpunit.result.cache
+
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Laravel
+backend/storage/*.key
+backend/storage/pail
+backend/storage/logs/*
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/storage/app/public/*
+backend/bootstrap/cache/*
+!backend/storage/app/public/.gitignore
+!backend/storage/framework/cache/.gitignore
+!backend/storage/framework/sessions/.gitignore
+!backend/storage/framework/views/.gitignore
+!backend/storage/logs/.gitignore
+
+# Database
+*.sqlite
+*.sqlite-journal
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+*.swp
+*.swo
+
+# Testing
+coverage/
+.nyc_output/
+
+# Temp install dir (bootstrap script)
+backend-tmp/

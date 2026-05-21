@@ -11,8 +11,9 @@ const API_URL = import.meta.env.VITE_API_URL ?? '/api';
 
 const DUPLICATE_EMAIL_MESSAGE = 'Este correo ya está registrado.';
 
-const JSON_HEADERS = {
+const API_HEADERS = {
   Accept: 'application/json',
+  'X-Requested-With': 'XMLHttpRequest',
 } as const;
 
 function buildFormData(values: PatientFormValues): FormData {
@@ -63,8 +64,22 @@ function throwValidationError(json: ApiValidationError | null): never {
   throw new PatientApiValidationError(message, fieldErrors);
 }
 
+async function apiFetch(input: string, init?: RequestInit): Promise<Response> {
+  try {
+    return await fetch(input, {
+      ...init,
+      headers: {
+        ...API_HEADERS,
+        ...init?.headers,
+      },
+    });
+  } catch {
+    throw new Error('No se pudo conectar con el servidor. Verificá que el backend esté en marcha.');
+  }
+}
+
 export async function fetchPatients(): Promise<Patient[]> {
-  const response = await fetch(`${API_URL}/patients`, { headers: JSON_HEADERS });
+  const response = await apiFetch(`${API_URL}/patients`);
   if (!response.ok) {
     throw new Error('Failed to load patients.');
   }
@@ -73,13 +88,21 @@ export async function fetchPatients(): Promise<Patient[]> {
 }
 
 export async function createPatient(values: PatientFormValues): Promise<Patient> {
-  const response = await fetch(`${API_URL}/patients`, {
+  const response = await apiFetch(`${API_URL}/patients`, {
     method: 'POST',
-    headers: JSON_HEADERS,
     body: buildFormData(values),
   });
 
-  const json = (await response.json().catch(() => null)) as ApiValidationError | null;
+  const rawBody = await response.text();
+  let json: ApiValidationError | null = null;
+
+  if (rawBody) {
+    try {
+      json = JSON.parse(rawBody) as ApiValidationError;
+    } catch {
+      json = null;
+    }
+  }
 
   if (!response.ok) {
     if (response.status === 422) {
@@ -92,13 +115,12 @@ export async function createPatient(values: PatientFormValues): Promise<Patient>
     throw new Error(json?.message ?? 'Registration failed.');
   }
 
-  return (json as unknown as { data: Patient }).data;
+  return (JSON.parse(rawBody) as { data: Patient }).data;
 }
 
 export async function deletePatient(id: number): Promise<void> {
-  const response = await fetch(`${API_URL}/patients/${id}`, {
+  const response = await apiFetch(`${API_URL}/patients/${id}`, {
     method: 'DELETE',
-    headers: JSON_HEADERS,
   });
 
   if (!response.ok) {

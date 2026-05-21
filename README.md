@@ -12,7 +12,7 @@ Node.js and PHP are **not** required if you run everything with Docker (default)
 ## Run the project
 
 ```bash
-git clone https://github.com/Martinrezy/challenge-light-it.git
+git clone <repository-url>
 cd challenge-light-it
 make docker-reset
 ```

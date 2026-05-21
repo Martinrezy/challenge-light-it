@@ -52,7 +52,7 @@ class StorePatientRequest extends FormRequest
         return [
             'full_name.regex' => 'The full name may only contain letters and spaces.',
             'email.regex' => 'The email must be a Gmail address (@gmail.com).',
-            'email.unique' => 'This email is already registered.',
+            'email.unique' => 'Este correo ya está registrado.',
             'phone_country_code.regex' => 'The country code must start with + followed by digits.',
             'phone_number.regex' => 'The phone number must contain only digits.',
             'document_photo.mimes' => 'The document photo must be a JPG image.',

@@ -1,12 +1,19 @@
 import {
   PatientApiValidationError,
   type ApiValidationError,
+  type FormErrors,
   type Patient,
   type PatientFormValues,
 } from '@/types/patient';
 import { mapApiErrorsToFormErrors } from '@/utils/mapApiErrors';
 
 const API_URL = import.meta.env.VITE_API_URL ?? '/api';
+
+const DUPLICATE_EMAIL_MESSAGE = 'Este correo ya está registrado.';
+
+const JSON_HEADERS = {
+  Accept: 'application/json',
+} as const;
 
 function buildFormData(values: PatientFormValues): FormData {
   const formData = new FormData();
@@ -22,19 +29,42 @@ function buildFormData(values: PatientFormValues): FormData {
   return formData;
 }
 
-function throwValidationError(json: ApiValidationError): never {
-  const fieldErrors = mapApiErrorsToFormErrors(json.errors);
+function isDuplicateEmailPayload(json: ApiValidationError | null): boolean {
+  if (!json) {
+    return false;
+  }
+
+  const emailErrors = json.errors?.email;
+  if (emailErrors?.some((msg) => /already|taken|unique|exists|registrado/i.test(msg))) {
+    return true;
+  }
+
+  return /email/i.test(json.message ?? '') && /already|taken|unique|exists|registrado/i.test(json.message ?? '');
+}
+
+function resolveValidationErrors(json: ApiValidationError | null): FormErrors {
+  const fieldErrors = mapApiErrorsToFormErrors(json?.errors);
+
+  if (!fieldErrors.email && isDuplicateEmailPayload(json)) {
+    fieldErrors.email = DUPLICATE_EMAIL_MESSAGE;
+  }
+
+  return fieldErrors;
+}
+
+function throwValidationError(json: ApiValidationError | null): never {
+  const fieldErrors = resolveValidationErrors(json);
   const message =
     fieldErrors.email ??
     Object.values(fieldErrors)[0] ??
-    json.message ??
+    json?.message ??
     'Please fix the errors below.';
 
   throw new PatientApiValidationError(message, fieldErrors);
 }
 
 export async function fetchPatients(): Promise<Patient[]> {
-  const response = await fetch(`${API_URL}/patients`);
+  const response = await fetch(`${API_URL}/patients`, { headers: JSON_HEADERS });
   if (!response.ok) {
     throw new Error('Failed to load patients.');
   }
@@ -45,26 +75,30 @@ export async function fetchPatients(): Promise<Patient[]> {
 export async function createPatient(values: PatientFormValues): Promise<Patient> {
   const response = await fetch(`${API_URL}/patients`, {
     method: 'POST',
+    headers: JSON_HEADERS,
     body: buildFormData(values),
   });
 
-  const json = await response.json();
+  const json = (await response.json().catch(() => null)) as ApiValidationError | null;
 
   if (!response.ok) {
-    if (response.status === 422 && json.errors) {
-      throwValidationError(json as ApiValidationError);
+    if (response.status === 422) {
+      const fieldErrors = resolveValidationErrors(json);
+      if (Object.keys(fieldErrors).length > 0) {
+        throwValidationError(json);
+      }
     }
 
-    const error = json as ApiValidationError;
-    throw new Error(error.message ?? 'Registration failed.');
+    throw new Error(json?.message ?? 'Registration failed.');
   }
 
-  return json.data as Patient;
+  return (json as unknown as { data: Patient }).data;
 }
 
 export async function deletePatient(id: number): Promise<void> {
   const response = await fetch(`${API_URL}/patients/${id}`, {
     method: 'DELETE',
+    headers: JSON_HEADERS,
   });
 
   if (!response.ok) {

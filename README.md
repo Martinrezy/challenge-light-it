@@ -1,4 +1,4 @@
-# Patient Registration — FullStack Challenge
+# Patient Registration
 
 Laravel API + React SPA + PostgreSQL, orchestrated with Docker Compose.
 

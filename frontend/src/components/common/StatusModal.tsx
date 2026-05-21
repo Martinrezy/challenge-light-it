@@ -13,9 +13,9 @@ export function StatusModal({ state, message, onClose }: StatusModalProps) {
   if (state === 'idle') return null;
 
   const titles: Record<Exclude<SubmitModalState, 'idle'>, string> = {
-    submitting: 'Registering patient...',
-    success: 'Registration successful',
-    error: 'Registration failed',
+    submitting: 'Saving...',
+    success: 'Saved',
+    error: 'Error',
   };
 
   return (
@@ -24,20 +24,20 @@ export function StatusModal({ state, message, onClose }: StatusModalProps) {
         {state === 'submitting' && (
           <>
             <div className="status-modal__icon status-modal__spinner" />
-            <p>Please wait while we save the patient data.</p>
+            <p>Saving patient...</p>
           </>
         )}
         {state === 'success' && (
           <>
             <div className="status-modal__icon status-modal__icon--success">✓</div>
-            <p>The patient was registered. A confirmation email will be sent shortly.</p>
+            <p>Patient registered. Confirmation email queued.</p>
             <Button onClick={onClose}>Close</Button>
           </>
         )}
         {state === 'error' && (
           <>
             <div className="status-modal__icon status-modal__icon--error">!</div>
-            <p>{message || 'Something went wrong. Please try again.'}</p>
+            <p>{message || 'Could not save. Try again.'}</p>
             <Button onClick={onClose}>Close</Button>
           </>
         )}

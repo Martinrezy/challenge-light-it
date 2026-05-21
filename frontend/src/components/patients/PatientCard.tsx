@@ -104,8 +104,7 @@ export function PatientCard({ patient, onDelete, isDeleting = false }: PatientCa
       >
         <div className="patient-card__confirm">
           <p>
-            Are you sure you want to delete <strong>{patient.full_name}</strong>? This action
-            cannot be undone.
+            Delete <strong>{patient.full_name}</strong>?
           </p>
           {deleteError && <p className="patient-card__confirm-error">{deleteError}</p>}
           <div className="patient-card__confirm-actions">

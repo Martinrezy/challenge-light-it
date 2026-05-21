@@ -13,7 +13,7 @@ interface PatientListProps {
 
 export function PatientList({ patients, loading, error, onDelete, deletingId = null }: PatientListProps) {
   if (loading) {
-    return <Spinner label="Loading patients..." />;
+    return <Spinner label="Loading..." />;
   }
 
   if (error) {
@@ -27,8 +27,8 @@ export function PatientList({ patients, loading, error, onDelete, deletingId = n
   if (patients.length === 0) {
     return (
       <div className="patient-list__empty">
-        <p className="patient-list__empty-title">No patients yet</p>
-        <p>Click &quot;Add Patient&quot; to register the first one.</p>
+        <p className="patient-list__empty-title">No patients</p>
+        <p>Use Add Patient to create one.</p>
       </div>
     );
   }

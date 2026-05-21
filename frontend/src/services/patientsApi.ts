@@ -9,7 +9,7 @@ import { mapApiErrorsToFormErrors } from '@/utils/mapApiErrors';
 
 const API_URL = import.meta.env.VITE_API_URL ?? '/api';
 
-const DUPLICATE_EMAIL_MESSAGE = 'Este correo ya está registrado.';
+const DUPLICATE_EMAIL_MESSAGE = 'This email is already registered.';
 
 const API_HEADERS = {
   Accept: 'application/json',
@@ -46,7 +46,7 @@ function isDuplicateEmailPayload(json: ApiValidationError | null): boolean {
 function resolveValidationErrors(json: ApiValidationError | null): FormErrors {
   const fieldErrors = mapApiErrorsToFormErrors(json?.errors);
 
-  if (!fieldErrors.email && isDuplicateEmailPayload(json)) {
+  if (isDuplicateEmailPayload(json)) {
     fieldErrors.email = DUPLICATE_EMAIL_MESSAGE;
   }
 
@@ -74,7 +74,7 @@ async function apiFetch(input: string, init?: RequestInit): Promise<Response> {
       },
     });
   } catch {
-    throw new Error('No se pudo conectar con el servidor. Verificá que el backend esté en marcha.');
+    throw new Error('Could not connect to the server. Make sure the backend is running.');
   }
 }
 
